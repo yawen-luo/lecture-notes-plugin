@@ -1,66 +1,101 @@
 # Lecture Notes Plugin
 
-A lightweight ChatGPT/Codex plugin for turning lecture slides and transcripts into a living Master Note.
+A lightweight ChatGPT/Codex plugin for turning lecture slides, transcripts, and study comments into one living **Notion Master Note per lecture**.
 
-**v0.2.1 is Notion-first and Chat-first.** Notion is the canonical editable note. The complete workflow should run directly in the current ChatGPT conversation. Google Docs is an optional fallback/export destination.
+## v0.3.0: Notion-only
 
-## Execution rule
-
-Lecture-note work should **not be automatically handed off to Work mode**.
-
-The following are expected to run directly in the current chat:
-- reading PPT/PDF + transcript;
-- generating the note;
-- creating/updating the Notion Master Note;
-- checking coverage;
-- reading Notion comments;
-- inserting answers beside selected text;
-- second-round follow-up;
-- ordinary restructuring and edits.
-
-Task length, transcript size, or multiple tool calls are not reasons to switch modes.
-
-Work is only appropriate when the user explicitly asks to use Work.
-
-## Core workflow
+The plugin now has one persistent workflow only:
 
 ```text
 PPT / PDF + transcript
         ↓
- current ChatGPT chat
+current ChatGPT conversation
         ↓
-  Notion Master Note
-        ↕
+canonical Notion Master Note
+        ↓
 select text → inline comment
         ↓
-   “处理评论”
+“处理评论”
         ↓
-answer inserted beside the selected material
+answer the comment discussion
++ improve the relevant body section
         ↓
-select part of the answer → ask again
+continue annotating the same page
 ```
 
-## What v0.2.1 implements
+The built-in Notion app is required. The plugin does not maintain a parallel document copy.
 
-- Notion-first canonical Master Note.
-- Chat-first execution: no automatic Work handoff.
-- Coverage-first lecture note generation.
-- Preserves formulas, proofs, derivations, examples, and instructor additions when taught.
-- Creates a standalone private Notion page by default when no destination is specified.
-- Supports select-to-ask using Notion inline comments.
-- Inserts answers directly next to the questioned content for iterative follow-up.
-- Keeps those explanations in the note unless the user explicitly asks to merge/rewrite/remove them.
-- Keeps Google Docs available as optional export/fallback.
-- Explicitly forbids image generation as a substitute for notes/documents.
+## Core behavior
 
-## What it deliberately does NOT do
+### Generate notes
 
-- No automatic Work delegation.
-- No automatic course database.
-- No knowledge graph.
-- No long-term confusion tracking.
-- No detailed slide/audio alignment.
-- No duplicate canonical copy in both Notion and Google Docs.
+When asked to generate/organize a lecture note, the plugin:
+
+1. reads the current lecture slides and transcript;
+2. determines what the lecturer actually covered;
+3. locates an existing Notion Master Note for the same lecture or creates one if none exists;
+4. writes a clean, comment-friendly note;
+5. verifies the page;
+6. returns the Notion link.
+
+It reuses the same page for later updates instead of creating duplicates.
+
+### Check coverage
+
+When asked to check completeness, the plugin compares the existing Notion note with the slides/transcript and repairs the same page in place.
+
+It should catch both:
+- missing taught knowledge;
+- later-slide material that was written as if it had already been taught.
+
+### Process comments
+
+The intended study interaction is:
+
+1. select text in Notion;
+2. add an inline comment such as `什么是 transistor？`;
+3. return to ChatGPT and say `处理评论`.
+
+The plugin then:
+
+1. reads the unresolved/new comment and selected context;
+2. answers the question;
+3. integrates durable conceptual explanations into the smallest sensible nearby place in the note;
+4. replies in the original Notion comment discussion;
+5. verifies the edit;
+6. returns the same Notion page link.
+
+The default is **not** to accumulate "AI explanation" blocks or a Q&A appendix. Useful answers should improve the Master Note itself.
+
+For typo, rewrite, notation, or formatting comments, the plugin edits the target directly and replies to the thread.
+
+## Comment-friendly note design
+
+Master Notes use:
+- clear H1/H2/H3 hierarchy;
+- coherent, reasonably short paragraphs;
+- one main idea per block when practical;
+- preserved formulas, derivations, examples, mappings, and circuit meaning;
+- a small number of meaningful callouts.
+
+Core content should not be hidden inside complex layouts or toggles because the page is meant to be selected and annotated.
+
+## Source discipline
+
+The current lecture slides/transcript define the note's factual and coverage basis.
+
+- Preserve terminology and notation from the course.
+- Keep lecturer additions that were actually taught.
+- Do not silently add later-slide material as if it was covered.
+- Do not silently fill source gaps with general knowledge.
+- Extra explanations added for study questions should not be falsely attributed to the lecturer.
+
+## Execution
+
+The workflow runs directly in the current ChatGPT conversation with the course files and the built-in Notion app.
+
+Do not automatically delegate lecture-note work to Work mode.
+Do not use image generation as a substitute for the note.
 
 ## Install / refresh for local testing
 
@@ -72,19 +107,23 @@ Then fully quit and reopen ChatGPT desktop. If the installed plugin still shows 
 
 ## Usage
 
-Attach the lecture PPT/PDF and transcript, then say:
+Attach the lecture PPT/PDF and transcript, then invoke Lecture Notes and say:
 
 ```text
 生成课堂笔记
 ```
 
-The plugin should complete the task directly in the current chat and create/update the Notion Master Note.
-
 During study:
-- Select text in Notion and add a comment such as `GPT：这里为什么？`
-- Return to ChatGPT and say `处理评论`
-- The answer is inserted directly beside the selected text.
-- You can select part of that answer and ask a second-round question.
+
+```text
+处理评论
+```
+
+For source comparison:
+
+```text
+检查完整性
+```
 
 ## Privacy
 
