@@ -23,6 +23,18 @@ Core principles:
 - Do not build a complex parsing/alignment pipeline unless the user explicitly asks.
 - **Do not use image generation for lecture-note creation, formatting, diagrams, or document output unless the user explicitly asks for an image.** A note/page/document is not an image.
 
+## Execution mode constraint — hard rule
+
+This workflow is designed to be completed **inside the current ChatGPT conversation** with the available file-reading and connected-app tools.
+
+- **Do not automatically create, delegate, or hand off this task to Work mode.**
+- Do not say that the task has been “given to Work”, “handed to Work”, or that Work will finish it.
+- The size of the PPT, length of the transcript, number of steps, need to create a Notion page, need to process comments, or need to make multiple tool calls are **not** reasons to switch to Work.
+- Complete lecture-note generation, Notion creation/editing, coverage checks, comment processing, and iterative follow-up directly in the current chat.
+- Use Work **only when the user explicitly asks in the current request to use Work / Work mode**.
+- If the current chat genuinely lacks a required tool or permission, state that specific limitation and complete everything else possible in the current chat. Do not autonomously switch modes as a workaround.
+- Do not consume Work/Codex quota for this workflow merely because the task is long or multi-step.
+
 ## 1. Input handling
 
 Expected inputs may include:
@@ -76,21 +88,22 @@ When the Notion app is available, creating or updating the editable Notion Maste
 - “做成 Master Note”
 
 Workflow:
-1. Generate the complete note.
+1. Generate the complete note in the current chat session.
 2. Read `references/notion-style.md`.
 3. Before the first Notion page write in the conversation, read `notion://docs/enhanced-markdown-spec` through the Notion app. Do not guess Notion markup.
 4. If the user explicitly names an existing Notion page, update that page.
 5. Otherwise create a new standalone private Notion page for the lecture. Do not automatically create a database or knowledge-management system.
 6. Write the full note into the page.
 7. Verify the created/updated page contains the intended note.
-8. Return the Notion page reference/link.
+8. Return the Notion page reference/link in the same conversation.
 
 If the user later provides a Lecture Notes database or parent page, use it as the destination for future notes after inspecting its schema/structure.
 
 If Notion is unavailable:
 - do not substitute image generation;
 - produce the note in chat;
-- if Google Drive is available, Google Docs may be used as a fallback only when appropriate or explicitly requested.
+- if Google Drive is available, Google Docs may be used as a fallback only when appropriate or explicitly requested;
+- do not hand the task to Work.
 
 ## 4. Writing style
 
