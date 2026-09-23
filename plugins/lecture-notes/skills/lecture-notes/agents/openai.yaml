@@ -1,7 +1,7 @@
 interface:
   display_name: "Lecture Notes"
-  short_description: "Create and refine editable Notion lecture notes directly in Chat"
-  default_prompt: "Complete this directly in the current ChatGPT conversation. Create an editable Notion Master Note from my uploaded slides and transcript. Do not hand the task off to Work."
+  short_description: "Create and refine one annotatable Notion Master Note per lecture"
+  default_prompt: "Use ChatGPT's built-in Notion app only. Locate or create the canonical Notion Master Note for this lecture, update that same page from my slides/transcript or comments, and return its link."
 
 policy:
   products:
