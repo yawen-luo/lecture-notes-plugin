@@ -29,6 +29,18 @@ Use only a small number of native Notion callout/highlight blocks for content th
 
 Keep them visually quiet. Prefer neutral/light backgrounds and avoid turning every definition or example into a callout.
 
+## AI explanation blocks
+
+Answers inserted from Notion comments are part of the study note and should stay near the questioned text.
+
+- Insert the answer immediately after the questioned paragraph/block when possible.
+- Label it consistently as **AI 解释** or **学习解释**.
+- Keep the styling distinct but restrained so the user can recognize it quickly.
+- The user may select text inside these explanation blocks and ask another question.
+- Follow-up answers should be inserted directly after the explanation being questioned.
+- Do not automatically collapse, merge, or remove these blocks during ordinary cleanup.
+- Only rewrite or remove them when the user explicitly asks.
+
 ## Formulas and technical material
 
 - Preserve equations and mathematical notation.
@@ -43,11 +55,3 @@ If the user says the existing content is already good and only wants formatting:
 - do not turn prose into bullets;
 - do not add extra bolding;
 - change only hierarchy, spacing/block choice, and a few justified callouts.
-
-## Comment interaction
-
-Comments are not part of the permanent note content.
-
-When a user asks a question through an inline comment:
-- answer in chat first;
-- only merge the useful understanding into the page when the user says “写进笔记” or otherwise explicitly asks to update it.
