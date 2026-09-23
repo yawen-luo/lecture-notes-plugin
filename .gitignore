@@ -1,0 +1,16 @@
+# Private course material
+course_materials/
+recordings/
+private_notes/
+*.mp3
+*.wav
+*.m4a
+
+# Credentials
+.env
+credentials.json
+token.json
+
+# OS/editor
+.DS_Store
+Thumbs.db
