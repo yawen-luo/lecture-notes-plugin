@@ -1,6 +1,6 @@
 ---
 name: lecture-notes
-description: Create and continuously refine complete course notes from lecture slides/PDFs, lecture transcripts or recordings, and existing notes. Use when the user asks to generate class notes, create or update a Notion Master Note, explain a passage from a Master Note, process comments attached to selected Notion text, merge a clarification back into the note, check coverage against course materials, reorganize a lecture note, or optionally export/update Google Docs.
+description: Create and continuously refine complete course notes from lecture slides/PDFs, lecture transcripts or recordings, and existing notes. Use when the user asks to generate class notes, create or update a Notion Master Note, process comments attached to selected Notion text, insert explanations beside the questioned material for iterative follow-up, check coverage against course materials, reorganize a lecture note, or optionally export/update Google Docs.
 ---
 
 # Lecture Notes Workflow
@@ -16,9 +16,9 @@ Default destination:
 2. **Google Docs** — optional fallback/export only when the user explicitly requests it or Notion is unavailable.
 
 Core principles:
-- Chat is the learning space.
-- The Notion page is the durable artifact.
-- Prefer **merge / replace** over appending repeated supplements.
+- The Notion page is the primary study surface and durable artifact.
+- Explanations inserted while studying are part of the note unless the user later asks to rewrite or remove them.
+- Prefer local insertion near the questioned material over collecting answers at the end.
 - Use ChatGPT's existing multimodal and document understanding directly.
 - Do not build a complex parsing/alignment pipeline unless the user explicitly asks.
 - **Do not use image generation for lecture-note creation, formatting, diagrams, or document output unless the user explicitly asks for an image.** A note/page/document is not an image.
@@ -132,15 +132,34 @@ The user's comment may be short, for example:
 When the user says “处理评论”:
 1. Identify the relevant Notion Master Note from the conversation.
 2. Fetch the page with discussion/comment context.
-3. Read the current comments and the text/block they are attached to when available.
-4. Prioritize unresolved/recent comments that clearly contain a question or instruction for GPT.
-5. Answer those questions in chat first, grouped by their original location.
-6. Do **not** automatically insert the full answer into the Master Note.
-7. Do not claim to resolve a Notion comment unless the available Notion tool actually supports resolving discussions.
+3. Read unresolved/recent comments and the text/block they are attached to when available.
+4. Generate a useful explanation for each clear question.
+5. **Insert the explanation directly into the Notion page immediately after the questioned paragraph/block, or at the smallest sensible nearby location.**
+6. Use a consistent visually distinct label such as **“AI 解释”** or **“学习解释”**.
+7. Keep the answer detailed enough to support understanding.
+8. If several comments refer to different locations, place each answer at its own original location rather than collecting answers at the end.
+9. Verify the insertions landed near the intended source material.
+10. In chat, give only a concise completion summary and the page link unless the user asks to also see the answer in chat.
 
-This preserves two layers:
-- Notion page = clean long-term knowledge.
-- comments/chat = temporary learning questions.
+### Second-round follow-up
+
+Inserted explanation blocks are intentionally selectable.
+
+If the user selects text inside an inserted explanation block, adds another comment, and says “处理评论” again:
+- treat it as a chained follow-up;
+- insert the next explanation immediately after the explanation block being questioned;
+- preserve the local question → answer → follow-up sequence;
+- do not move the thread to the end of the page.
+
+These inserted explanations remain part of the note. Do **not** automatically remove, merge, or rewrite them later.
+
+Only rewrite, merge, or delete them when the user explicitly asks, for example:
+- “把这段问答整理成正式笔记”
+- “去掉问答痕迹”
+- “重写这一节”
+- “删除这些 AI 解释”
+
+Do not claim to resolve a Notion comment unless the available Notion tool actually supports resolving discussions.
 
 ## 6. Interaction commands
 
@@ -150,18 +169,12 @@ Interpret these phrases as workflow commands even when the user does not use exa
 Explain the selected/current passage in chat only.
 Do not change the Master Note.
 
-### “写进笔记”
-Take the useful understanding from the immediately preceding explanation/comment answer, compress it into note-quality prose, and merge it into the correct conceptual location in the Notion Master Note.
-Do not paste the full chat explanation.
-Prefer replacing or expanding the existing paragraph over adding a detached supplement.
-Fetch the current page before editing, then update the smallest sensible section.
+### “处理评论”
+Read the Notion comments and insert answers directly beside the questioned material so the user can continue selecting and asking follow-up questions.
 
 ### “重写这里”
 Rewrite the targeted passage for clarity while preserving its knowledge content and course terminology.
 Replace the old explanation rather than appending a duplicate.
-
-### “这个只是帮我理解，不要写进去”
-Keep the explanation in chat only.
 
 ### “检查完整性”
 Compare the current Master Note with the relevant slides + transcript.
@@ -169,11 +182,11 @@ Repair missing or incomplete knowledge points directly in the Notion Master Note
 Do not expose a large audit table unless useful or requested.
 
 ### “整理这节课”
-Remove repetition caused by iterative edits, merge overlapping explanations, and normalize hierarchy/readability without losing unique knowledge.
-Update the same Master Note rather than creating a second version.
+Improve structure, remove accidental duplication, and normalize hierarchy/readability without automatically deleting or merging the user's inserted AI explanation blocks.
+Only transform those explanation blocks when the user explicitly asks.
 
-### “处理评论”
-Follow the Select-to-ask workflow above.
+### “导出到 Google Docs”
+Create/update a Google Docs copy when explicitly requested.
 
 ## 7. Google Docs optional fallback/export
 
@@ -190,23 +203,7 @@ When using Google Docs:
 
 Do not maintain two canonical copies by default. Notion remains canonical unless the user explicitly changes the preference.
 
-## 8. Editing principle
-
-The Master Note should always represent the best current version, not the history of the conversation.
-
-Bad:
-- initial explanation
-- supplement 1
-- supplement 2
-- follow-up answer
-- another clarification at the bottom
-
-Good:
-- one integrated explanation in the concept's natural location.
-
-**Merge, don't append.**
-
-## 9. Efficiency
+## 8. Efficiency
 
 This workflow is intentionally lightweight.
 
@@ -223,5 +220,5 @@ unless the user explicitly asks for those features.
 Spend model effort on:
 1. complete coverage;
 2. accurate explanation;
-3. clean note structure;
+3. local, easy-to-follow iterative Q&A in the note;
 4. high-quality incremental editing.
