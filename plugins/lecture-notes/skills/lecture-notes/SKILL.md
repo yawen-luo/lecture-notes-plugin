@@ -1,237 +1,272 @@
 ---
 name: lecture-notes
-description: Create and continuously refine complete course notes from lecture slides/PDFs, lecture transcripts or recordings, and existing notes. Use when the user asks to generate class notes, create or update a Notion Master Note, process comments attached to selected Notion text, insert explanations beside the questioned material for iterative follow-up, check coverage against course materials, reorganize a lecture note, or optionally export/update Google Docs.
+description: Create and continuously refine one canonical, annotatable Notion Master Note per lecture from lecture slides/PDFs, transcripts, existing notes, and inline Notion comments. Use when the user asks to generate or organize lecture notes, check coverage, update the current Master Note, process comments attached to selected Notion text, or refine explanations in place.
 ---
 
-# Lecture Notes Workflow
+# Lecture Notes — Notion Master Note Workflow
 
-Use this skill for lecture-note work. Prefer the current chat's course materials and the user's explicitly named Master Note. Do not import unrelated course context from other chats or projects unless the user explicitly asks.
+Use this skill for lecture-note work.
+
+## Hard rule: one Notion chain
+
+The persistent artifact for this workflow is **Notion only**.
+
+Use ChatGPT's built-in Notion app to:
+1. locate or create the lecture's canonical Master Note;
+2. read it;
+3. update it;
+4. read its inline comments;
+5. reply to comment discussions;
+6. return the same page link.
+
+Do not create or maintain a second canonical copy in another document system.
+Do not hand the workflow to Work mode.
+Do not use image generation as a substitute for a note.
+
+The complete lecture-note workflow should run in the current ChatGPT conversation with the current course files plus the built-in Notion app.
 
 ## Core goal
 
-Maintain one increasingly good **editable Master Note per lecture**.
+Maintain **one increasingly good, editable, comment-friendly Notion Master Note per lecture**.
 
-Default destination:
-1. **Notion** — canonical Master Note.
-2. **Google Docs** — optional fallback/export only when the user explicitly requests it or Notion is unavailable.
+The note should support this loop:
 
-Core principles:
-- The Notion page is the primary study surface and durable artifact.
-- Explanations inserted while studying are part of the note unless the user later asks to rewrite or remove them.
-- Prefer local insertion near the questioned material over collecting answers at the end.
-- Use ChatGPT's existing multimodal and document understanding directly.
-- Do not build a complex parsing/alignment pipeline unless the user explicitly asks.
-- **Do not use image generation for lecture-note creation, formatting, diagrams, or document output unless the user explicitly asks for an image.** A note/page/document is not an image.
+```text
+slides / transcript
+      ↓
+canonical Notion Master Note
+      ↓
+select text in Notion → add inline comment
+      ↓
+"处理评论"
+      ↓
+answer the discussion
++ improve the relevant body section
+      ↓
+continue studying and commenting on the improved note
+```
 
-## Execution mode constraint — hard rule
+Do not create a new Master Note for the same lecture when a clear existing one already exists.
 
-This workflow is designed to be completed **inside the current ChatGPT conversation** with the available file-reading and connected-app tools.
+## 1. Source scope
 
-- **Do not automatically create, delegate, or hand off this task to Work mode.**
-- Do not say that the task has been “given to Work”, “handed to Work”, or that Work will finish it.
-- The size of the PPT, length of the transcript, number of steps, need to create a Notion page, need to process comments, or need to make multiple tool calls are **not** reasons to switch to Work.
-- Complete lecture-note generation, Notion creation/editing, coverage checks, comment processing, and iterative follow-up directly in the current chat.
-- Use Work **only when the user explicitly asks in the current request to use Work / Work mode**.
-- If the current chat genuinely lacks a required tool or permission, state that specific limitation and complete everything else possible in the current chat. Do not autonomously switch modes as a workaround.
-- Do not consume Work/Codex quota for this workflow merely because the task is long or multi-step.
+Default source scope:
+- the slides/PDF/PPT/PPTX attached in the current chat;
+- the transcript/recording text attached or pasted in the current chat;
+- the explicitly named or located Notion Master Note.
 
-## 1. Input handling
+Do not import unrelated course material from other chats, files, or web sources unless the user explicitly asks.
 
-Expected inputs may include:
-- PPT/PPTX/PDF lecture slides;
-- lecture recording or transcript;
-- existing notes;
-- an existing Notion Master Note;
-- an optional Google Doc.
+When the user asks to study, summarize, check, or answer from the lecture sources:
+- ground the note in what those sources actually support;
+- preserve their terminology, notation, organization, and level of detail;
+- do not silently fill gaps with general knowledge;
+- if extra explanation is added to answer the user's question, distinguish it from lecturer/source content when attribution matters.
 
-For slides + transcript:
-1. Scan both sources before drafting.
-2. Determine the actual scope taught in class.
-3. Use the transcript mainly to:
-   - determine where the lecturer actually stopped;
-   - recover lecturer explanations, examples, comparisons, emphasis, and additions not written on slides;
-   - interpret sparse slides.
-4. Do **not** perform minute-by-minute alignment or generate a large coverage table unless the user asks.
-5. When transcript wording is noisy, use slide terminology and context to repair obvious transcription errors. Do not invent material and attribute it to the lecturer.
+## 2. Locate the canonical Notion Master Note
 
-## 2. Coverage-first note generation
+Before creating a page, determine whether this lecture already has one.
 
-Before writing, perform a lightweight internal coverage scan. Do not print it unless requested.
+Use this order:
 
-Check for:
-- concepts and definitions;
-- formulas and symbol meanings;
-- proofs and derivations actually taught;
-- worked examples;
-- comparisons;
-- diagrams/circuit/architecture meaning when relevant;
-- lecturer additions and emphasis;
-- content the lecturer skimmed or skipped.
+1. If the current conversation already contains the Notion page URL/ID created or used for this lecture, reuse it.
+2. If the user explicitly provides a Notion page or says which page is the Master Note, use it.
+3. Otherwise search Notion using the strongest identifiers available, such as:
+   - course code;
+   - lecture/topic number;
+   - lecture title;
+   - "Master Note".
+4. Fetch the best matching candidate before editing it.
+5. If one clear page matches the same lecture, reuse it.
+6. If no matching page exists, create a standalone private Notion page.
+7. If several plausible pages remain genuinely ambiguous, ask only when choosing the wrong one would materially risk editing the wrong lecture.
 
-Then draft the note.
+Once a page is chosen or created, it remains the canonical page for subsequent commands in the conversation.
 
-Before finishing, compare the draft against the slides and transcript again and repair important omissions.
+## 3. Generate a lecture Master Note
 
-### Non-negotiable coverage rules
+When the user asks "生成课堂笔记", "整理这节课", "做成 Master Note", or equivalent:
 
-- Do not merely paraphrase slides page by page.
-- Do not omit a proof, derivation, formula, example, or diagram because it seems "too detailed" if the class covered it.
-- Do not merge distinct knowledge points just to make the structure shorter.
-- Preserve course terminology, notation, formulas, and meaningful ordering.
-- Distinguish lecturer content from later explanatory additions when attribution matters.
+1. Read the current slides and transcript before drafting.
+2. Determine the **actual lecture coverage boundary** from the transcript:
+   - what was taught;
+   - where the lecturer stopped;
+   - what the lecturer only previewed;
+   - what exists on later slides but was not yet taught.
+3. Internally scan for:
+   - definitions / concepts;
+   - formulas and symbol meanings;
+   - proofs / derivations actually taught;
+   - worked examples;
+   - comparisons;
+   - diagrams/circuits/architectures and their meaning;
+   - lecturer additions, emphasis, warnings, and assumptions.
+4. Draft a coherent lecture handout, not a slide-by-slide paraphrase.
+5. Read `references/notion-style.md`.
+6. Before the first Notion write in the conversation, read `notion://docs/enhanced-markdown-spec` through the Notion app.
+7. Locate or create the canonical Notion page using Section 2.
+8. Write or update the note in that page.
+9. Fetch the page again after a substantial write and verify:
+   - the intended content landed;
+   - the hierarchy is correct;
+   - untaught later-slide material was not mixed into taught content;
+   - unrelated existing material was not damaged.
+10. Return the Notion page link in the same chat.
 
-## 3. Default output: Notion Master Note
+### Coverage rules
 
-When the Notion app is available, creating or updating the editable Notion Master Note is part of task completion for requests such as:
-- “生成课堂笔记”
-- “整理这节课”
-- “做成 Master Note”
+- Do not omit a proof, derivation, formula, example, diagram, or lecturer addition merely because it seems detailed if it was taught.
+- Do not merge distinct knowledge points just to shorten the note.
+- Do not silently include slides beyond the transcript-defined stopping point as if they were taught.
+- If later slides are worth retaining for orientation, place them in a clearly labeled "not yet taught / future coverage" section.
+- Prefer a complete, readable note over a verbose coverage map.
 
-Workflow:
-1. Generate the complete note in the current chat session.
-2. Read `references/notion-style.md`.
-3. Before the first Notion page write in the conversation, read `notion://docs/enhanced-markdown-spec` through the Notion app. Do not guess Notion markup.
-4. If the user explicitly names an existing Notion page, update that page.
-5. Otherwise create a new standalone private Notion page for the lecture. Do not automatically create a database or knowledge-management system.
-6. Write the full note into the page.
-7. Verify the created/updated page contains the intended note.
-8. Return the Notion page reference/link in the same conversation.
+## 4. Comment-friendly writing
 
-If the user later provides a Lecture Notes database or parent page, use it as the destination for future notes after inspecting its schema/structure.
+The user annotates the page directly in Notion.
 
-If Notion is unavailable:
-- do not substitute image generation;
-- produce the note in chat;
-- if Google Drive is available, Google Docs may be used as a fallback only when appropriate or explicitly requested;
-- do not hand the task to Work.
+Therefore:
+- write coherent but reasonably short blocks;
+- keep one main idea per paragraph when practical;
+- avoid giant paragraphs;
+- use clear headings and local examples;
+- do not hide core study content in toggles;
+- do not create a database or dashboard by default.
 
-## 4. Writing style
+The page should remain easy to select, comment on, and revise locally.
 
-The note should read like a clean lecture handout / textbook note, not an AI summary.
+## 5. Process Notion comments — "处理评论"
 
-Default:
-- Chinese explanation as the main language when the user is working in Chinese;
-- keep important English technical terms;
-- use natural paragraphs and clear headings;
-- use bullet points only for true enumerations;
-- avoid excessive bold text;
-- avoid decorative emoji;
-- use a small number of meaningful Notion callout/highlight blocks;
-- let structure follow the subject instead of forcing every concept into the same template.
+This is a core workflow command.
 
-For mathematics / ECE:
-- define symbols;
-- keep derivations/proofs that were taught;
-- make each transformation understandable.
+When the user says "处理评论":
 
-For CS / AI:
-- explain the problem, core idea, process/architecture, and contrasts when useful.
+1. Identify the canonical Notion Master Note using Section 2.
+2. Fetch the page with discussion context enabled.
+3. Read comments/discussions across child blocks, including inline comments.
+4. Focus on unresolved or newly updated study comments.
+5. Avoid duplicating work: if a user question in a discussion has already been answered by the assistant and there is no newer user follow-up, skip it.
+6. For each clear new question:
+   - read the selected text and the nearby note context;
+   - if needed, consult the current lecture slides/transcript so the explanation stays grounded;
+   - answer the question accurately.
+7. Decide whether the answer should improve the durable Master Note.
 
-For circuits / logic:
-- retain truth tables, expressions, mappings, and physical meaning where relevant.
+### 5.1 Durable conceptual answer → integrate into the body
 
-## 5. Select-to-ask workflow in Notion
+For questions such as:
+- "什么是 X？"
+- "为什么？"
+- "这个公式每个符号什么意思？"
+- "这里怎么推出来的？"
+- "举个例子"
 
-The intended study interaction is:
+when the explanation is useful for later review:
 
-**Select text in Notion → add an inline comment → return to ChatGPT → say “处理评论”.**
+1. integrate it into the **smallest sensible nearby location** in the body;
+2. make it read like normal lecture-note content, not pasted chat;
+3. prefer a natural subsection, paragraph, example, definition, or intermediate derivation;
+4. preserve the selected source text when possible so the comment anchor is not unnecessarily disturbed;
+5. do **not** create a generic "AI 解释" block by default;
+6. do **not** append the answer to a global Q&A section.
 
-The user's comment may be short, for example:
-- “GPT：这里为什么？”
-- “GPT：举个例子”
-- “GPT：这个公式每个符号什么意思？”
-- “GPT：重写得更好懂”
+Then reply in the original Notion discussion with a concise answer and say that the useful explanation was integrated into the note.
 
-When the user says “处理评论”:
-1. Identify the relevant Notion Master Note from the conversation.
-2. Fetch the page with discussion/comment context.
-3. Read unresolved/recent comments and the text/block they are attached to when available.
-4. Generate a useful explanation for each clear question.
-5. **Insert the explanation directly into the Notion page immediately after the questioned paragraph/block, or at the smallest sensible nearby location.**
-6. Use a consistent visually distinct label such as **“AI 解释”** or **“学习解释”**.
-7. Keep the answer detailed enough to support understanding.
-8. If several comments refer to different locations, place each answer at its own original location rather than collecting answers at the end.
-9. Verify the insertions landed near the intended source material.
-10. In chat, give only a concise completion summary and the page link unless the user asks to also see the answer in chat.
+### 5.2 Rewrite / correction comment → edit the target directly
 
-### Second-round follow-up
+For requests such as:
+- "重写得更好懂"
+- "这里有错"
+- "这个符号不对"
+- formatting / typo corrections
 
-Inserted explanation blocks are intentionally selectable.
+update the targeted passage directly, preserving the surrounding structure and course terminology, then reply in the original discussion.
 
-If the user selects text inside an inserted explanation block, adds another comment, and says “处理评论” again:
-- treat it as a chained follow-up;
-- insert the next explanation immediately after the explanation block being questioned;
-- preserve the local question → answer → follow-up sequence;
-- do not move the thread to the end of the page.
+### 5.3 Transient/meta comment → reply without bloating the note
 
-These inserted explanations remain part of the note. Do **not** automatically remove, merge, or rewrite them later.
+If the comment is useful to answer but does not create durable study content, reply in the discussion without forcing it into the body.
 
-Only rewrite, merge, or delete them when the user explicitly asks, for example:
-- “把这段问答整理成正式笔记”
-- “去掉问答痕迹”
-- “重写这一节”
-- “删除这些 AI 解释”
+### 5.4 Follow-up comments
 
-Do not claim to resolve a Notion comment unless the available Notion tool actually supports resolving discussions.
+If the user comments on material that was added during a previous comment-processing pass:
+- treat it as a second-round study question;
+- refine that same local section again;
+- keep the note cohesive rather than building a visible Q&A chain.
 
-## 6. Interaction commands
+### 5.5 Finish the pass
 
-Interpret these phrases as workflow commands even when the user does not use exact punctuation.
+After processing one or more comments:
+1. fetch the page again;
+2. verify the edits landed in the intended sections;
+3. preserve unrelated content;
+4. do not claim comments are resolved unless the available Notion tool actually supports resolving them;
+5. in chat, give a concise completion summary and the same Notion page link.
 
-### “解释这里”
+## 6. Other commands
+
+Read `references/commands.md` for shorthand.
+
+### "解释这里"
+
 Explain the selected/current passage in chat only.
-Do not change the Master Note.
+Do not edit the Notion note unless the user asks to write the explanation in.
 
-### “处理评论”
-Read the Notion comments and insert answers directly beside the questioned material so the user can continue selecting and asking follow-up questions.
+### "重写这里"
 
-### “重写这里”
-Rewrite the targeted passage for clarity while preserving its knowledge content and course terminology.
-Replace the old explanation rather than appending a duplicate.
+Rewrite the targeted Notion passage in place for clarity.
+Preserve knowledge content, technical terminology, notation, and lecture coverage.
 
-### “检查完整性”
-Compare the current Master Note with the relevant slides + transcript.
-Repair missing or incomplete knowledge points directly in the Notion Master Note when available.
-Do not expose a large audit table unless useful or requested.
+### "检查完整性"
 
-### “整理这节课”
-Improve structure, remove accidental duplication, and normalize hierarchy/readability without automatically deleting or merging the user's inserted AI explanation blocks.
-Only transform those explanation blocks when the user explicitly asks.
+1. Locate/fetch the canonical Notion Master Note.
+2. Compare it with the current lecture slides + transcript.
+3. Identify omissions, incomplete explanations, and material that was included even though the lecturer had not reached it.
+4. Repair the same Notion page in place.
+5. Verify and return the same page link.
+6. Do not dump a large audit table into chat unless the user explicitly asks to see the audit.
 
-### “导出到 Google Docs”
-Create/update a Google Docs copy when explicitly requested.
+### "整理这节课"
 
-## 7. Google Docs optional fallback/export
+Improve the same Notion page:
+- hierarchy;
+- readability;
+- local ordering;
+- accidental duplication;
+- comment-friendliness.
 
-Use Google Docs only when:
-- the user explicitly requests Google Docs;
-- the user wants print/PDF/formal-document-oriented formatting;
-- Notion is unavailable and Google Drive is an appropriate fallback.
+Do not change the source-defined coverage boundary merely to make the note look more complete.
 
-When using Google Docs:
-1. Read `references/google-doc-style.md`.
-2. Preserve good existing content.
-3. Do not change wording merely to make the document prettier.
-4. Verify the write landed in the intended document.
+## 7. Notion editing discipline
 
-Do not maintain two canonical copies by default. Notion remains canonical unless the user explicitly changes the preference.
+Before editing an existing page:
+- fetch it first;
+- inspect the target and nearby section;
+- make the smallest complete edit;
+- preserve unrelated content.
+
+Prefer targeted content updates over replacing the entire page when possible.
+
+For substantial multi-part edits, fetch again afterward and verify.
+
+Always return the canonical Notion page link after a create/update/comment-processing task.
 
 ## 8. Efficiency
 
-This workflow is intentionally lightweight.
+Keep the workflow lightweight.
 
 Do not create:
 - a knowledge graph;
-- a persistent database of every question;
-- detailed slide-to-timestamp alignment;
-- long-term confusion counters;
+- a course database;
+- confusion counters;
+- slide-to-timestamp alignment;
 - extra JSON state;
-- an automatic course database unless the user asks;
+- duplicate note copies;
 
-unless the user explicitly asks for those features.
+unless the user explicitly asks.
 
-Spend model effort on:
-1. complete coverage;
-2. accurate explanation;
-3. local, easy-to-follow iterative Q&A in the note;
-4. high-quality incremental editing.
+Spend effort on:
+1. source-grounded coverage;
+2. clear explanation;
+3. correct local integration of answers;
+4. reliable Notion editing;
+5. preserving one canonical page.
