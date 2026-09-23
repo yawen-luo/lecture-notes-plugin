@@ -1,0 +1,40 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "lecture-notes",
+  "version": "0.1.0",
+  "description": "Turn lecture slides and transcripts into complete living notes that can be refined over time.",
+  "author": {
+    "name": "Yawen Luo"
+  },
+  "repository": "https://github.com/yawen-luo/lecture-notes-plugin",
+  "homepage": "https://github.com/yawen-luo/lecture-notes-plugin",
+  "license": "MIT",
+  "keywords": [
+    "education",
+    "lecture-notes",
+    "study",
+    "google-docs"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Lecture Notes",
+        "shortDescription": "Living lecture notes",
+        "longDescription": "Create complete, readable Master Notes from lecture slides and transcripts, then keep improving the same note through questions, targeted rewrites, coverage checks, and Google Docs comments.",
+        "developerName": "Yawen Luo",
+        "category": "Productivity",
+        "capabilities": [
+          "Create notes from slides and lecture transcripts",
+          "Preserve formulas, proofs, examples, and instructor additions",
+          "Refine a Master Note without appending duplicate explanations",
+          "Work with Google Docs when a connected Docs tool is available"
+        ],
+        "defaultPrompt": [
+          "Use my slides and transcript to create a complete, readable Master Note.",
+          "Check this lecture note against the slides and transcript for missing knowledge points.",
+          "Process my unresolved Google Docs comments for this lecture note."
+        ]
+      }
+    }
+  }
+}
