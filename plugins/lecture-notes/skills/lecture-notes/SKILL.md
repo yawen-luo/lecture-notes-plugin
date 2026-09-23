@@ -1,6 +1,6 @@
 ---
 name: lecture-notes
-description: Create and continuously refine complete course notes from lecture slides/PDFs, lecture transcripts or recordings, and existing notes. Use when the user asks to generate class notes, create or update a Google Docs Master Note, explain a passage from a Master Note, merge a clarification back into the note, check coverage against course materials, reorganize a lecture note, or process Google Docs comments.
+description: Create and continuously refine complete course notes from lecture slides/PDFs, lecture transcripts or recordings, and existing notes. Use when the user asks to generate class notes, create or update a Notion Master Note, explain a passage from a Master Note, process comments attached to selected Notion text, merge a clarification back into the note, check coverage against course materials, reorganize a lecture note, or optionally export/update Google Docs.
 ---
 
 # Lecture Notes Workflow
@@ -9,13 +9,19 @@ Use this skill for lecture-note work. Prefer the current chat's course materials
 
 ## Core goal
 
-Maintain one increasingly good **editable Google Docs Master Note** per lecture whenever the Google Drive app is available.
+Maintain one increasingly good **editable Master Note per lecture**.
 
+Default destination:
+1. **Notion** — canonical Master Note.
+2. **Google Docs** — optional fallback/export only when the user explicitly requests it or Notion is unavailable.
+
+Core principles:
 - Chat is the learning space.
-- Google Docs is the canonical durable artifact.
+- The Notion page is the durable artifact.
 - Prefer **merge / replace** over appending repeated supplements.
-- Use ChatGPT's existing multimodal and document understanding directly. Do not build or request a complex parsing/alignment pipeline unless the user explicitly asks.
-- **Do not use image generation for lecture-note creation, formatting, diagrams, or document output unless the user explicitly asks for an image.** A document is not an image.
+- Use ChatGPT's existing multimodal and document understanding directly.
+- Do not build a complex parsing/alignment pipeline unless the user explicitly asks.
+- **Do not use image generation for lecture-note creation, formatting, diagrams, or document output unless the user explicitly asks for an image.** A note/page/document is not an image.
 
 ## 1. Input handling
 
@@ -23,9 +29,8 @@ Expected inputs may include:
 - PPT/PPTX/PDF lecture slides;
 - lecture recording or transcript;
 - existing notes;
-- an existing Google Doc Master Note.
-
-Process inputs quickly.
+- an existing Notion Master Note;
+- an optional Google Doc.
 
 For slides + transcript:
 1. Scan both sources before drafting.
@@ -63,25 +68,29 @@ Before finishing, compare the draft against the slides and transcript again and 
 - Preserve course terminology, notation, formulas, and meaningful ordering.
 - Distinguish lecturer content from later explanatory additions when attribution matters.
 
-## 3. Output destination: Google Docs by default
+## 3. Default output: Notion Master Note
 
-When the Google Drive app is available, **creating the editable Google Docs Master Note is part of task completion**, not an optional follow-up.
+When the Notion app is available, creating or updating the editable Notion Master Note is part of task completion for requests such as:
+- “生成课堂笔记”
+- “整理这节课”
+- “做成 Master Note”
 
-For a request such as “生成课堂笔记”, “整理这节课”, or “做成 Master Note”:
+Workflow:
 1. Generate the complete note.
-2. Read `references/google-doc-style.md`.
-3. Create a new native Google Doc for the lecture, or update the user's explicitly named existing Master Note.
-4. Write the finished content into that Google Doc.
-5. Apply the requested lecture-note formatting.
-6. Verify that the document exists and contains the intended note.
-7. Return the Google Docs link to the user.
+2. Read `references/notion-style.md`.
+3. Before the first Notion page write in the conversation, read `notion://docs/enhanced-markdown-spec` through the Notion app. Do not guess Notion markup.
+4. If the user explicitly names an existing Notion page, update that page.
+5. Otherwise create a new standalone private Notion page for the lecture. Do not automatically create a database or knowledge-management system.
+6. Write the full note into the page.
+7. Verify the created/updated page contains the intended note.
+8. Return the Notion page reference/link.
 
-Do not stop after producing prose in chat if the Google Drive app is available.
+If the user later provides a Lecture Notes database or parent page, use it as the destination for future notes after inspecting its schema/structure.
 
-If Google Drive is unavailable or not connected:
+If Notion is unavailable:
 - do not substitute image generation;
-- provide the note in chat;
-- state clearly that the live Google Doc could not be created or updated because Google Drive access is unavailable.
+- produce the note in chat;
+- if Google Drive is available, Google Docs may be used as a fallback only when appropriate or explicitly requested.
 
 ## 4. Writing style
 
@@ -94,6 +103,7 @@ Default:
 - use bullet points only for true enumerations;
 - avoid excessive bold text;
 - avoid decorative emoji;
+- use a small number of meaningful Notion callout/highlight blocks;
 - let structure follow the subject instead of forcing every concept into the same template.
 
 For mathematics / ECE:
@@ -107,14 +117,30 @@ For CS / AI:
 For circuits / logic:
 - retain truth tables, expressions, mappings, and physical meaning where relevant.
 
-## 5. Google Docs Master Note editing
+## 5. Select-to-ask workflow in Notion
 
-When editing an existing Master Note:
-1. Preserve good existing content unless the user asks for content edits.
-2. Read the current document before changing it.
-3. Do not change wording merely to make the document prettier.
-4. Merge improvements into the correct conceptual location.
-5. After a substantive write, verify the intended content landed in the intended document.
+The intended study interaction is:
+
+**Select text in Notion → add an inline comment → return to ChatGPT → say “处理评论”.**
+
+The user's comment may be short, for example:
+- “GPT：这里为什么？”
+- “GPT：举个例子”
+- “GPT：这个公式每个符号什么意思？”
+- “GPT：重写得更好懂”
+
+When the user says “处理评论”:
+1. Identify the relevant Notion Master Note from the conversation.
+2. Fetch the page with discussion/comment context.
+3. Read the current comments and the text/block they are attached to when available.
+4. Prioritize unresolved/recent comments that clearly contain a question or instruction for GPT.
+5. Answer those questions in chat first, grouped by their original location.
+6. Do **not** automatically insert the full answer into the Master Note.
+7. Do not claim to resolve a Notion comment unless the available Notion tool actually supports resolving discussions.
+
+This preserves two layers:
+- Notion page = clean long-term knowledge.
+- comments/chat = temporary learning questions.
 
 ## 6. Interaction commands
 
@@ -125,9 +151,10 @@ Explain the selected/current passage in chat only.
 Do not change the Master Note.
 
 ### “写进笔记”
-Take the useful understanding from the immediately preceding explanation, compress it into note-quality prose, and merge it into the correct conceptual location in the Google Docs Master Note.
+Take the useful understanding from the immediately preceding explanation/comment answer, compress it into note-quality prose, and merge it into the correct conceptual location in the Notion Master Note.
 Do not paste the full chat explanation.
 Prefer replacing or expanding the existing paragraph over adding a detached supplement.
+Fetch the current page before editing, then update the smallest sensible section.
 
 ### “重写这里”
 Rewrite the targeted passage for clarity while preserving its knowledge content and course terminology.
@@ -138,20 +165,32 @@ Keep the explanation in chat only.
 
 ### “检查完整性”
 Compare the current Master Note with the relevant slides + transcript.
-Repair missing or incomplete knowledge points directly in the Master Note when Google Drive is available.
+Repair missing or incomplete knowledge points directly in the Notion Master Note when available.
 Do not expose a large audit table unless useful or requested.
 
 ### “整理这节课”
-Remove repetition caused by iterative edits, merge overlapping explanations, and normalize hierarchy/readability without losing unique knowledge. Update the same Master Note.
+Remove repetition caused by iterative edits, merge overlapping explanations, and normalize hierarchy/readability without losing unique knowledge.
+Update the same Master Note rather than creating a second version.
 
 ### “处理评论”
-Use the Google Drive app to read unresolved comments and their quoted text.
-1. Answer the questions first.
-2. Do not automatically insert every long answer into the note.
-3. When the user says “写进去”, patch the relevant original location.
-4. Resolve comments only when the user's intent supports doing so.
+Follow the Select-to-ask workflow above.
 
-## 7. Editing principle
+## 7. Google Docs optional fallback/export
+
+Use Google Docs only when:
+- the user explicitly requests Google Docs;
+- the user wants print/PDF/formal-document-oriented formatting;
+- Notion is unavailable and Google Drive is an appropriate fallback.
+
+When using Google Docs:
+1. Read `references/google-doc-style.md`.
+2. Preserve good existing content.
+3. Do not change wording merely to make the document prettier.
+4. Verify the write landed in the intended document.
+
+Do not maintain two canonical copies by default. Notion remains canonical unless the user explicitly changes the preference.
+
+## 8. Editing principle
 
 The Master Note should always represent the best current version, not the history of the conversation.
 
@@ -167,7 +206,7 @@ Good:
 
 **Merge, don't append.**
 
-## 8. Efficiency
+## 9. Efficiency
 
 This workflow is intentionally lightweight.
 
@@ -177,6 +216,7 @@ Do not create:
 - detailed slide-to-timestamp alignment;
 - long-term confusion counters;
 - extra JSON state;
+- an automatic course database unless the user asks;
 
 unless the user explicitly asks for those features.
 
