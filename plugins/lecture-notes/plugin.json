@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "lecture-notes",
-  "version": "0.2.1",
-  "description": "Turn lecture slides and transcripts into complete living notes in the current ChatGPT conversation, using Notion as the default editable Master Note.",
+  "version": "0.3.0",
+  "description": "Create and continuously refine one annotatable Notion Master Note per lecture from slides, transcripts, and inline study comments.",
   "author": {
     "name": "Yawen Luo"
   },
@@ -14,30 +14,33 @@
     "lecture-notes",
     "study",
     "notion",
-    "google-docs"
+    "master-note",
+    "comments"
   ],
   "extensions": {
     "com.openai": {
       "apps": "./.app.json",
       "interface": {
         "displayName": "Lecture Notes",
-        "shortDescription": "Living lecture notes in Notion",
-        "longDescription": "Create and refine complete Master Notes directly in the current ChatGPT conversation, save them as editable Notion pages, and support iterative inline-comment follow-up. Do not hand lecture-note tasks off to Work unless the user explicitly requests Work. Google Docs remains an optional fallback/export destination.",
+        "shortDescription": "Living, annotatable lecture notes in Notion",
+        "longDescription": "Use ChatGPT's built-in Notion app as the only persistent note surface. Create or locate one Notion Master Note per lecture, compare it against the current slides and transcript, update the same page, return its link, and process inline Notion comments by answering the discussion and integrating durable explanations into the relevant body section.",
         "developerName": "Yawen Luo",
         "category": "Productivity",
         "capabilities": [
-          "Complete lecture-note workflows directly in the current ChatGPT conversation",
-          "Create editable Notion Master Notes",
-          "Create notes from slides and lecture transcripts",
-          "Preserve formulas, proofs, examples, and instructor additions",
-          "Read Notion comments attached to selected text",
-          "Insert explanations locally for iterative follow-up",
-          "Optionally create or update Google Docs"
+          "Create one editable Notion Master Note per lecture",
+          "Locate and reuse the existing Notion Master Note instead of creating duplicates",
+          "Create notes from lecture slides and transcripts",
+          "Preserve formulas, proofs, examples, diagrams, and instructor additions actually taught",
+          "Respect the transcript-defined lecture coverage boundary",
+          "Check a current Master Note against source materials and repair omissions",
+          "Read inline Notion comments attached to selected text",
+          "Integrate durable answers into the relevant note section and reply in the original comment thread",
+          "Return the canonical Notion page link after creation or updates"
         ],
         "defaultPrompt": [
-          "Complete this directly in the current ChatGPT conversation: create an editable Notion Master Note from my uploaded slides and transcript. Do not hand the task off to Work.",
-          "Process the comments I just added to my Notion lecture note directly in this chat and insert the answers beside the questioned text.",
-          "Check my current Master Note against the slides and transcript for missing knowledge points, directly in this chat."
+          "Create or update my Notion Master Note from the uploaded slides and transcript. Use the built-in Notion app only, reuse the existing page for this lecture when one exists, and return the Notion link.",
+          "Process the comments on my current Notion Master Note: answer each unresolved study question, integrate durable explanations into the relevant body section, reply in the original comment thread, and keep using the same page.",
+          "Check my current Notion Master Note against the slides and transcript for missing or over-included knowledge, repair it in place, and return the page link."
         ]
       }
     }
