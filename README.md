@@ -1,6 +1,8 @@
 # Lecture Notes Plugin
 
-A lightweight, skills-only plugin for turning lecture slides and transcripts into a living Master Note.
+A lightweight ChatGPT/Codex plugin for turning lecture slides and transcripts into a living Master Note.
+
+**v0.2.0 is Notion-first.** Notion is the canonical editable note; Google Docs is an optional fallback/export destination.
 
 ## Core workflow
 
@@ -9,23 +11,43 @@ PPT / PDF + transcript
         ↓
       ChatGPT
         ↓
- Google Docs Master Note
+  Notion Master Note
         ↕
-question / comment / rewrite
+select text → inline comment
         ↓
-merge useful understanding back into the note
+   “处理评论”
+        ↓
+ explanation in chat
+        ↓
+   “写进笔记”
+        ↓
+merge back into the original section
 ```
 
-The plugin is intentionally simple: it relies on ChatGPT's existing document and multimodal understanding instead of building a separate parser, database, or knowledge graph.
+The plugin intentionally relies on ChatGPT's existing document/multimodal understanding instead of building a separate parser, database, or knowledge graph.
 
-## What it does
+## What v0.2.0 implements
 
 - Coverage-first lecture note generation.
-- Preserves formulas, proofs, derivations, examples, and instructor additions when they were taught.
-- Keeps chat explanations separate from the canonical Master Note unless the user asks to merge them.
-- Supports commands such as `写进笔记`, `重写这里`, `检查完整性`, `整理这节课`, and `处理评论`.
-- Uses Google Docs as the canonical note when a compatible connected Google Drive/Docs tool is available.
-- Keeps formatting textbook-like: larger readable body text, few bullets, little bold, and only a few subtle highlight blocks.
+- Preserves formulas, proofs, derivations, examples, and instructor additions when taught.
+- Creates a standalone private Notion page by default when no destination is specified.
+- Supports a select-to-ask workflow using Notion inline comments.
+- Keeps temporary explanations in chat until the user explicitly says `写进笔记`.
+- Merges useful explanations back into the correct original section instead of appending supplements.
+- Supports `重写这里`, `检查完整性`, `整理这节课`, and `处理评论`.
+- Uses restrained Notion formatting: natural paragraphs, clear headings, few bullets, little bold, and a small number of meaningful callouts.
+- Keeps Google Docs available as an optional export/fallback.
+- Explicitly forbids image generation as a substitute for notes/documents.
+
+## What v0.2.0 deliberately does NOT do
+
+- It does not automatically create a course database.
+- It does not build a knowledge graph.
+- It does not keep a long-term confusion counter.
+- It does not perform detailed slide-to-audio timestamp alignment.
+- It does not maintain duplicate canonical copies in both Notion and Google Docs.
+
+If you later provide a Lecture Notes database or parent page, the plugin can use that as the destination for future notes.
 
 ## Structure
 
@@ -35,31 +57,29 @@ The plugin is intentionally simple: it relies on ChatGPT's existing document and
 └── plugins/
     └── lecture-notes/
         ├── plugin.json
+        ├── .app.json
         └── skills/
             └── lecture-notes/
                 ├── SKILL.md
+                ├── agents/openai.yaml
                 └── references/
                     ├── commands.md
+                    ├── notion-style.md
                     └── google-doc-style.md
 ```
 
-## Install for local testing
-
-OpenAI supports repo-backed plugin marketplaces in ChatGPT desktop Work mode / Codex.
-
-With Codex CLI:
+## Install / refresh for local testing
 
 ```bash
 codex plugin marketplace add yawen-luo/lecture-notes-plugin
+codex plugin marketplace upgrade
 ```
 
-Then open ChatGPT desktop, go to Plugins, select the marketplace **Yawen Lecture Tools**, and install **Lecture Notes**.
-
-Availability can vary by product surface and rollout.
+Then restart ChatGPT desktop, open Plugins, select **Yawen Lecture Tools**, and install/refresh **Lecture Notes**.
 
 ## Usage
 
-Start a fresh chat, attach the lecture PPT/PDF and transcript, then say:
+Attach the lecture PPT/PDF and transcript, then say:
 
 ```text
 生成课堂笔记
@@ -67,12 +87,9 @@ Start a fresh chat, attach the lecture PPT/PDF and transcript, then say:
 
 During study:
 
-- `解释这里` — explain without editing the note.
-- `写进笔记` — merge the useful explanation into the right place.
-- `重写这里` — rewrite the targeted passage.
-- `检查完整性` — compare against the source materials and repair omissions.
-- `整理这节课` — remove redundancy and normalize structure.
-- `处理评论` — process unresolved Google Docs comments when Docs access is available.
+- Select text in Notion and add a comment such as `GPT：这里为什么？`
+- Return to ChatGPT and say `处理评论`
+- After the explanation, say `写进笔记` only if you want the useful part merged into the permanent note.
 
 ## Privacy
 
