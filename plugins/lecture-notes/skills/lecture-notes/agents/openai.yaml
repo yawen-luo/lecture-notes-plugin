@@ -1,0 +1,10 @@
+interface:
+  display_name: "Lecture Notes"
+  short_description: "Create and refine editable Google Docs lecture notes"
+  default_prompt: "Create an editable Google Docs Master Note from my uploaded slides and transcript."
+
+policy:
+  products:
+    - CHAT
+    - CODEX
+  allow_implicit_invocation: true
