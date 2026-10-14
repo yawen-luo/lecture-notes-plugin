@@ -125,17 +125,17 @@ For source comparison:
 检查完整性
 ```
 
-## Additional Agent Skill — Career Application
+## Related Agent Skill — Career Application
 
-This repository also hosts a standalone, skills.sh-compatible [Career Application Agent Skill](skills/career-application/SKILL.md) (v1.0.0). It consolidates resume/CV tailoring, cover-letter writing, independent application review and strict rubric scoring into one evidence-grounded workflow with on-demand references and privacy-safe LaTeX assets.
+The standalone [Career Application Skill](https://github.com/yawen-luo/agent-skills/tree/main/skills/career-application) has **moved to the dedicated [agent-skills repository](https://github.com/yawen-luo/agent-skills)**. To avoid duplicate maintained copies, this repository now contains only the Lecture Notes plugin.
 
-Install only that Skill using:
+Install Career Application from its new home:
 
 ```bash
-npx skills add yawen-luo/lecture-notes-plugin --skill career-application
+npx skills add yawen-luo/agent-skills --skill career-application
 ```
 
-This is a standalone Agent Skill, not part of the Lecture Notes ChatGPT plugin. Existing Lecture Notes behavior and installation remain unchanged.
+Old Git history preserves the original package, but all future Career Application updates belong in `yawen-luo/agent-skills`.
 
 ## Privacy
 
